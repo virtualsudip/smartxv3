@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/sudipbasnet/Desktop/SmartX/contracts/PurchaseOrderManager.sol": {
+      "lastModificationDate": 1778733764463,
+      "contentHash": "726cd8f85a543329227322847c6d1d1e",
+      "sourceName": "contracts/PurchaseOrderManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "PurchaseOrderManager"
+      ]
+    }
+  }
+}
