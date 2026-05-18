@@ -1,0 +1,28 @@
+{
+  "name": "smartx-po-system",
+  "version": "1.0.0",
+  "description": "SmartX – Automated Purchase Order Management System with Blockchain Integration",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "server": "node server/index.js",
+    "compile": "npx hardhat compile",
+    "chain": "npx hardhat node",
+    "deploy": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "setup": "npm install && npx hardhat compile"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "ethers": "^6.13.0",
+    "express": "^4.18.2"
+  }
+}
