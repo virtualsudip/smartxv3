@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartX – Purchase Order Management</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ── Sidebar ─────────────────────────────────────────────────────────────── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">SX</div>
+    <div>
+      <div class="brand-name">SmartX</div>
+      <div class="brand-sub">Purchase Order System</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">◼</span> Dashboard
+    </a>
+    <a class="nav-item" data-page="orders">
+      <span class="nav-icon">≡</span> Purchase Orders
+    </a>
+    <a class="nav-item" data-page="suppliers">
+      <span class="nav-icon">◈</span> Suppliers
+    </a>
+    <a class="nav-item" data-page="inventory">
+      <span class="nav-icon">▣</span> Inventory
+    </a>
+    <a class="nav-item" data-page="analytics">
+      <span class="nav-icon">▲</span> Analytics
+    </a>
+    <a class="nav-item" data-page="blockchain">
+      <span class="nav-icon">◎</span> Blockchain
+    </a>
+    <a class="nav-item admin-only" data-page="users" style="display:none">
+      <span class="nav-icon">◉</span> Users
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div id="chain-status" class="chain-badge disconnected">● Connecting…</div>
+  </div>
+</aside>
+
+<!-- ── Main ────────────────────────────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- Top bar -->
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <button class="hamburger" id="btn-hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div id="page-title" class="page-title">Dashboard</div>
+    </div>
+    <div class="topbar-actions">
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary manager-up" id="btn-new-order">+ New Purchase Order</button>
+
+      <!-- Theme toggle -->
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle light / dark mode">◑</button>
+
+      <!-- Notification bell -->
+      <div class="notif-wrap" id="notif-wrap">
+        <button class="notif-bell" id="notif-bell" aria-label="Notifications" onclick="toggleNotifPanel()">
+          🔔
+          <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+        </button>
+        <div class="notif-panel" id="notif-panel" style="display:none">
+          <div class="notif-panel-header">
+            <span>Notifications</span>
+            <button class="btn-ghost btn btn-sm" onclick="clearNotifs()">Clear all</button>
+          </div>
+          <div id="notif-list"><p class="text-muted p-sm" style="font-size:13px">No notifications yet</p></div>
+        </div>
+      </div>
+
+      <div class="user-chip" id="user-chip">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name">–</div>
+          <div class="user-role-badge" id="user-role-badge">–</div>
+        </div>
+        <button class="btn-logout" id="btn-logout" title="Sign out">⏻</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── DASHBOARD PAGE ─────────────────────────────────────────────────────── -->
+  <div id="page-dashboard" class="page active">
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#6366f120;color:#6366f1;font-size:13px;font-weight:800">PO</div>
+        <div class="kpi-body">
+          <div class="kpi-value" id="kpi-total">–</div>
+          <div class="kpi-label">Total Orders</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#f59e0b20;color:#f59e0b;font-size:13px;font-weight:800">P</div>
+        <div class="kpi-body">
+          <div class="kpi-value" id="kpi-pending">–</div>
+          <div class="kpi-label">Pending</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#10b98120;color:#10b981;font-size:15px;font-weight:700">✓</div>
+        <div class="kpi-body">
+          <div class="kpi-value" id="kpi-approved">–</div>
+          <div class="kpi-label">Approved</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#3b82f620;color:#3b82f6;font-size:13px;font-weight:800">D</div>
+        <div class="kpi-body">
+          <div class="kpi-value" id="kpi-delivered">–</div>
+          <div class="kpi-label">Delivered</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#ef444420;color:#ef4444;font-size:15px;font-weight:700">!</div>
+        <div class="kpi-body">
+          <div class="kpi-value" id="kpi-alerts">–</div>
+          <div class="kpi-label">Low Stock Alerts</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#8b5cf620;color:#8b5cf6;font-size:13px;font-weight:800">S</div>
+        <div class="kpi-body">
+          <div class="kpi-value" id="kpi-suppliers">–</div>
+          <div class="kpi-label">Active Suppliers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Required panel (role-aware) -->
+    <div class="card dash-action-card" id="dash-action-card" style="margin-bottom:1.5rem;display:none">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">
+        <span style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:16px">⚡</span> Requires Your Action
+        </span>
+        <span class="badge badge-pending" id="dash-action-count">0 pending</span>
+      </div>
+      <table class="table">
+        <thead>
+          <tr><th>#</th><th>Supplier</th><th>Items</th><th>Amount</th><th>Status</th><th>Quick Actions</th></tr>
+        </thead>
+        <tbody id="dash-action-body">
+          <tr><td colspan="6" class="text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">Recent Purchase Orders</div>
+        <table class="table" id="dash-orders-table">
+          <thead><tr><th>#</th><th>Supplier</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="dash-orders-body"><tr><td colspan="5" class="text-muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header">Low Stock Alerts</div>
+        <div id="dash-alerts-list"><p class="text-muted p-sm">Checking inventory…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PURCHASE ORDERS PAGE ───────────────────────────────────────────────── -->
+  <div id="page-orders" class="page">
+
+    <div class="toolbar">
+      <div class="filter-tabs" id="order-filter-tabs">
+        <button class="ftab active" data-status="all">All</button>
+        <button class="ftab" data-status="0">Pending</button>
+        <button class="ftab" data-status="1">Approved</button>
+        <button class="ftab" data-status="2">Rejected</button>
+        <button class="ftab" data-status="3">Shipped</button>
+        <button class="ftab" data-status="4">Delivered</button>
+        <button class="ftab" data-status="5">Cancelled</button>
+      </div>
+      <input type="text" class="search-input" id="order-search" placeholder="Search supplier or notes…" />
+    </div>
+
+    <div class="card">
+      <table class="table" id="orders-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Supplier</th>
+            <th>Items</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Expected</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="orders-body">
+          <tr><td colspan="8" class="text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SUPPLIERS PAGE ────────────────────────────────────────────────────── -->
+  <div id="page-suppliers" class="page">
+    <div class="toolbar">
+      <input type="text" class="search-input" id="supplier-search" placeholder="Search suppliers…" />
+      <button class="btn btn-primary" id="btn-add-supplier">+ Add Supplier</button>
+    </div>
+    <div class="card">
+      <table class="table" id="suppliers-table">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Category</th><th>Contact</th><th>Email</th><th>Phone</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="suppliers-body">
+          <tr><td colspan="9" class="text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── INVENTORY PAGE ────────────────────────────────────────────────────── -->
+  <div id="page-inventory" class="page">
+    <div class="toolbar">
+      <input type="text" class="search-input" id="inv-search" placeholder="Search inventory…" />
+      <button class="btn btn-primary" id="btn-add-inv">+ Add Item</button>
+    </div>
+    <div class="card">
+      <table class="table" id="inventory-table">
+        <thead>
+          <tr><th>SKU</th><th>Name</th><th>Category</th><th>Stock Level</th><th>Threshold</th><th>Unit Cost</th><th>Supplier</th><th>Location</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="inventory-body">
+          <tr><td colspan="9" class="text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── ANALYTICS PAGE ────────────────────────────────────────────────────── -->
+  <div id="page-analytics" class="page">
+    <div class="kpi-grid" id="analytics-kpis">
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-value" id="an-total">–</div>
+          <div class="kpi-label">Total Orders</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-value" id="an-value">–</div>
+          <div class="kpi-label">Total PO Value</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-value" id="an-rate">–</div>
+          <div class="kpi-label">Approval Rate</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-value" id="an-suppliers">–</div>
+          <div class="kpi-label">Active Suppliers</div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">Order Status Breakdown</div>
+        <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Monthly Order Volume</div>
+        <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-header">Top Suppliers by Order Value</div>
+      <table class="table" id="top-suppliers-table">
+        <thead><tr><th>Rank</th><th>Supplier</th><th>Orders</th><th>Total Value</th></tr></thead>
+        <tbody id="top-suppliers-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── BLOCKCHAIN PAGE ───────────────────────────────────────────────────── -->
+  <div id="page-blockchain" class="page">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">Network Status</div>
+        <div id="bc-status-panel" class="bc-info-list">
+          <p class="text-muted">Loading…</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">Transaction Lookup</div>
+        <div class="form-group">
+          <label>Transaction Hash</label>
+          <input type="text" id="bc-tx-input" placeholder="0x…" class="form-control" />
+        </div>
+        <button class="btn btn-primary" onclick="lookupTx()">Look Up</button>
+        <div id="bc-tx-result" style="margin-top:1rem"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-header">Recent Blockchain Events</div>
+      <table class="table" id="bc-events-table">
+        <thead><tr><th>Event</th><th>Order #</th><th>Details</th><th>Tx Hash</th></tr></thead>
+        <tbody id="bc-events-body"><tr><td colspan="4" class="text-muted">Loading events…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── USERS PAGE (admin only) ──────────────────────────────────────────── -->
+  <div id="page-users" class="page">
+    <div class="toolbar">
+      <input type="text" class="search-input" id="users-search" placeholder="Search users…" />
+      <button class="btn btn-primary" id="btn-add-user">+ Add User</button>
+    </div>
+    <div class="card">
+      <table class="table" id="users-table">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Username</th><th>Role</th><th>Company</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="users-body">
+          <tr><td colspan="8" class="text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MODALS
+     ════════════════════════════════════════════════════════════════════════ -->
+
+<!-- Create / View Order Modal -->
+<div id="modal-order" class="modal-overlay" style="display:none">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span id="modal-order-title">New Purchase Order</span>
+      <button class="modal-close" onclick="closeModal('modal-order')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-order-body">
+      <!-- filled dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- View Order Detail Modal -->
+<div id="modal-view-order" class="modal-overlay" style="display:none">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span>Purchase Order Details</span>
+      <button class="modal-close" onclick="closeModal('modal-view-order')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-view-body">
+    </div>
+  </div>
+</div>
+
+<!-- Add Supplier Modal -->
+<div id="modal-supplier" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-supplier-title">Add Supplier</span>
+      <button class="modal-close" onclick="closeModal('modal-supplier')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="supplier-form">
+        <div class="form-row">
+          <div class="form-group"><label>Company Name *</label><input class="form-control" name="name" required /></div>
+          <div class="form-group"><label>Category</label><input class="form-control" name="category" placeholder="e.g. IT Distribution" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Contact Person</label><input class="form-control" name="contact" /></div>
+          <div class="form-group"><label>Email</label><input class="form-control" name="email" type="email" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Phone</label><input class="form-control" name="phone" /></div>
+          <div class="form-group"><label>ABN</label><input class="form-control" name="abn" placeholder="XX XXX XXX XXX" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Address</label><input class="form-control" name="address" /></div>
+          <div class="form-group"><label>Website</label><input class="form-control" name="website" placeholder="example.com.au" /></div>
+        </div>
+        <div style="padding:.6rem .8rem;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px;font-size:12px;color:var(--muted);margin-bottom:.75rem">
+          🔑 A login username &amp; password will be <strong style="color:var(--text)">auto-generated</strong> and shown after saving.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modal-supplier')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Supplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Update Inventory Modal -->
+<div id="modal-inv" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-inv-title">Update Inventory</span>
+      <button class="modal-close" onclick="closeModal('modal-inv')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="inv-form">
+        <input type="hidden" name="id" />
+        <div class="form-row">
+          <div class="form-group"><label>Item Name *</label><input class="form-control" name="name" required /></div>
+          <div class="form-group"><label>SKU</label><input class="form-control" name="sku" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Current Stock *</label><input class="form-control" name="currentStock" type="number" min="0" required /></div>
+          <div class="form-group"><label>Min Threshold *</label><input class="form-control" name="minThreshold" type="number" min="0" required /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Reorder Qty</label><input class="form-control" name="reorderQty" type="number" min="0" /></div>
+          <div class="form-group"><label>Unit Cost (cents)</label><input class="form-control" name="unitCost" type="number" min="0" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Unit</label><input class="form-control" name="unit" /></div>
+          <div class="form-group"><label>Category</label><input class="form-control" name="category" /></div>
+        </div>
+        <div class="form-group"><label>Location</label><input class="form-control" name="location" /></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modal-inv')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit User Modal -->
+<div id="modal-user" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <span id="modal-user-title">Add User</span>
+      <button class="modal-close" onclick="closeModal('modal-user')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="user-form">
+        <div class="form-row">
+          <div class="form-group"><label>Full Name *</label><input class="form-control" name="name" required /></div>
+          <div class="form-group"><label>Username *</label><input class="form-control" name="username" required /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Password *</label><input class="form-control" name="password" type="password" required /></div>
+          <div class="form-group">
+            <label>Role *</label>
+            <select class="form-control" name="role" id="user-form-role" required onchange="toggleCompanyField()">
+              <option value="">– Select –</option>
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="supplier">Supplier</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" id="company-field" style="display:none">
+          <label>Company Name (required for Supplier)</label>
+          <input class="form-control" name="company" id="user-company" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status</label>
+            <select class="form-control" name="status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('modal-user')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Credentials Modal -->
+<div id="modal-creds" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <span>🔑 Supplier Account Created</span>
+      <button class="modal-close" onclick="closeModal('modal-creds')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-creds-body"></div>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

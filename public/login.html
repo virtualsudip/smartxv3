@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartX – Sign In</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f172a;
+      --surface: #1e293b;
+      --card:    #243047;
+      --border:  #334155;
+      --primary: #6366f1;
+      --primary-h:#4f46e5;
+      --purple:  #8b5cf6;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger:  #ef4444;
+      --info:    #3b82f6;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background blobs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .18;
+      pointer-events: none;
+    }
+    body::before { width: 600px; height: 600px; background: var(--primary); top: -200px; left: -200px; }
+    body::after  { width: 500px; height: 500px; background: var(--purple);  bottom: -150px; right: -150px; }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 100%;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      background: var(--surface);
+      border: none;
+      border-radius: 0;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Left panel */
+    .login-left {
+      background: linear-gradient(145deg, #1a1f3a 0%, #0f172a 100%);
+      padding: 3rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--border);
+    }
+
+    .brand { display: flex; align-items: center; gap: .85rem; margin-bottom: 3rem; }
+    .brand-logo {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 17px; letter-spacing: -1px; flex-shrink: 0;
+    }
+    .brand-name { font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
+    .brand-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .left-headline { font-size: 30px; font-weight: 800; line-height: 1.25; margin-bottom: 1rem; }
+    .left-headline span { color: var(--primary); }
+    .left-desc { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 2.5rem; }
+
+    .features { display: flex; flex-direction: column; gap: .85rem; }
+    .feature-item {
+      display: flex; align-items: flex-start; gap: .75rem;
+      font-size: 13.5px;
+    }
+    .feature-icon {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .feature-title { font-weight: 600; font-size: 13px; }
+    .feature-desc  { color: var(--muted); font-size: 12px; margin-top: 1px; }
+
+    .left-footer { margin-top: 2rem; font-size: 11px; color: var(--muted); }
+    .left-footer a { color: var(--primary); text-decoration: none; }
+
+    /* Right panel */
+    .login-right {
+      padding: 3rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    .login-title    { font-size: 24px; font-weight: 800; margin-bottom: .4rem; }
+    .login-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 2rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1.1rem; }
+    label {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute; left: .85rem; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 15px; pointer-events: none;
+    }
+    .form-control {
+      width: 100%; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: .75rem .9rem .75rem 2.5rem;
+      color: var(--text); font-size: 14px; transition: border-color .15s, box-shadow .15s;
+    }
+    .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+
+    .error-box {
+      background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+      border-radius: 10px; padding: .7rem 1rem; font-size: 13px; color: var(--danger);
+      margin-bottom: 1rem; display: none; align-items: center; gap: .5rem;
+    }
+
+    .btn-login {
+      width: 100%; padding: .85rem; background: var(--primary); color: #fff;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background .15s, transform .1s;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+    }
+    .btn-login:hover   { background: var(--primary-h); }
+    .btn-login:active  { transform: scale(.98); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+
+    .divider {
+      display: flex; align-items: center; gap: .75rem;
+      margin: 1.5rem 0; color: var(--muted); font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Demo accounts */
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .demo-card {
+      padding: .65rem .7rem; border-radius: 10px; border: 1px solid var(--border);
+      cursor: pointer; transition: all .15s; background: var(--card);
+      text-align: center;
+    }
+    .demo-card:hover { border-color: var(--primary); transform: translateY(-1px); }
+    .demo-role  { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; margin-bottom: .3rem; }
+    .demo-card.admin    .demo-role { color: var(--danger); }
+    .demo-card.manager  .demo-role { color: var(--warning); }
+    .demo-card.user     .demo-role { color: var(--info); }
+    .demo-card.supplier .demo-role { color: var(--success); }
+    .demo-card.admin    { border-top: 2px solid var(--danger); }
+    .demo-card.manager  { border-top: 2px solid var(--warning); }
+    .demo-card.user     { border-top: 2px solid var(--info); }
+    .demo-card.supplier { border-top: 2px solid var(--success); }
+    .demo-user  { font-size: 12px; font-weight: 700; color: var(--text); }
+    .demo-pass  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .demo-note  { font-size: 10px; color: var(--muted); margin-top: 3px; font-style: italic; }
+
+    @media (max-width: 700px) {
+      .login-wrapper { grid-template-columns: 1fr; }
+      .login-left    { display: none; }
+      .login-right   { padding: 2rem 1.5rem; justify-content: flex-start; padding-top: 3rem; }
+      .demo-grid     { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+
+  <!-- Left: branding panel -->
+  <div class="login-left">
+    <div>
+      <div class="brand">
+        <div class="brand-logo">SX</div>
+        <div>
+          <div class="brand-name">SmartX</div>
+          <div class="brand-sub">Purchase Order System</div>
+        </div>
+      </div>
+      <div class="left-headline">Automated <span>Purchase Order</span> Management</div>
+      <div class="left-desc">
+        Streamline procurement with blockchain-backed smart contracts.
+        Full traceability, real-time tracking, and tamper-proof audit trails.
+      </div>
+      <div class="features">
+        <div class="feature-item">
+          <div class="feature-icon" style="background:#6366f120;color:#6366f1">⛓</div>
+          <div>
+            <div class="feature-title">Blockchain Integration</div>
+            <div class="feature-desc">Every PO recorded on Ethereum — immutable audit trail</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon" style="background:#10b98120;color:#10b981">🔒</div>
+          <div>
+            <div class="feature-title">Role-Based Access</div>
+            <div class="feature-desc">Admin, Manager, and Supplier portals with scoped permissions</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon" style="background:#f59e0b20;color:#f59e0b">📊</div>
+          <div>
+            <div class="feature-title">Real-Time Analytics</div>
+            <div class="feature-desc">KPI dashboards, inventory alerts, and supplier performance</div>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon" style="background:#3b82f620;color:#3b82f6">🚚</div>
+          <div>
+            <div class="feature-title">Supply Chain Tracking</div>
+            <div class="feature-desc">End-to-end PO lifecycle from creation to delivery</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="left-footer">
+      © 2026 SmartX · Purchase Order Management System
+    </div>
+  </div>
+
+  <!-- Right: login form -->
+  <div class="login-right">
+    <div class="login-title">Welcome back</div>
+    <div class="login-subtitle">Sign in to access your portal</div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label>Username</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input class="form-control" type="text" id="username" placeholder="Enter your username" autocomplete="username" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔑</span>
+          <input class="form-control" type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required />
+        </div>
+      </div>
+
+      <div class="error-box" id="error-box">
+        ⚠ <span id="error-msg">Invalid username or password</span>
+      </div>
+
+      <button class="btn-login" type="submit" id="btn-login">
+        Sign In →
+      </button>
+    </form>
+
+    <div class="divider">Quick sign-in — demo accounts</div>
+
+    <div class="demo-grid">
+      <div class="demo-card admin" onclick="fillDemo('sudip','Sudip@123')">
+        <div class="demo-role">Admin</div>
+        <div class="demo-user">sudip</div>
+        <div class="demo-pass">Sudip@123</div>
+        <div class="demo-note">Sudip Basnet</div>
+      </div>
+      <div class="demo-card manager" onclick="fillDemo('rohit','Rohit@123')">
+        <div class="demo-role">Manager</div>
+        <div class="demo-user">rohit</div>
+        <div class="demo-pass">Rohit@123</div>
+        <div class="demo-note">Rohit Shah</div>
+      </div>
+      <div class="demo-card supplier" onclick="fillDemo('awash','Awash@123')">
+        <div class="demo-role">Supplier</div>
+        <div class="demo-user">awash</div>
+        <div class="demo-pass">Awash@123</div>
+        <div class="demo-note">Awash Poudel · Ingram Micro</div>
+      </div>
+      <div class="demo-card supplier" onclick="fillDemo('samir','Samir@123')">
+        <div class="demo-role">Supplier</div>
+        <div class="demo-user">samir</div>
+        <div class="demo-pass">Samir@123</div>
+        <div class="demo-note">Samir Simkhada · Dicker Data</div>
+      </div>
+      <div class="demo-card supplier" onclick="fillDemo('sandesh','Sandesh@123')">
+        <div class="demo-role">Supplier</div>
+        <div class="demo-user">sandesh</div>
+        <div class="demo-pass">Sandesh@123</div>
+        <div class="demo-note">Sandesh Bhattarai · Synnex</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // If already logged in, go to dashboard
+  if (localStorage.getItem("sx_token")) window.location.href = "/";
+
+  function fillDemo(u, p) {
+    document.getElementById("username").value = u;
+    document.getElementById("password").value = p;
+    document.getElementById("username").focus();
+  }
+
+  // ── Inline field validation ──────────────────────────────────────────────
+  function showErr(input, msg) {
+    input.style.borderColor = "var(--danger)";
+    input.style.boxShadow   = "0 0 0 3px rgba(239,68,68,.15)";
+    let e = input.parentNode.querySelector(".login-field-error");
+    if (!e) {
+      e = document.createElement("div");
+      e.className = "login-field-error";
+      e.style.cssText = "color:var(--danger);font-size:11.5px;margin-top:.3rem;display:flex;gap:.3rem;align-items:center";
+      input.parentNode.appendChild(e);
+    }
+    e.innerHTML = "⚠ " + msg;
+  }
+  function clearErr(input) {
+    input.style.borderColor = "";
+    input.style.boxShadow   = "";
+    const e = input.parentNode.querySelector(".login-field-error");
+    if (e) e.remove();
+  }
+
+  const unInput = document.getElementById("username");
+  const pwInput = document.getElementById("password");
+  unInput.addEventListener("input", () => clearErr(unInput));
+  pwInput.addEventListener("input", () => clearErr(pwInput));
+
+  document.getElementById("login-form").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    // Client-side validation
+    let valid = true;
+    if (!unInput.value.trim()) { showErr(unInput, "Username is required"); valid = false; }
+    if (!pwInput.value)        { showErr(pwInput, "Password is required");  valid = false; }
+    else if (pwInput.value.length < 4) { showErr(pwInput, "Password too short"); valid = false; }
+    if (!valid) return;
+
+    const btn    = document.getElementById("btn-login");
+    const errBox = document.getElementById("error-box");
+    const errMsg = document.getElementById("error-msg");
+    errBox.style.display = "none";
+    btn.disabled    = true;
+    btn.textContent = "Signing in…";
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: unInput.value.trim(), password: pwInput.value })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      localStorage.setItem("sx_token", data.token);
+      localStorage.setItem("sx_user",  JSON.stringify(data.user));
+      window.location.href = "/";
+    } catch (err) {
+      // Show error on both fields for wrong credentials
+      if (err.message.includes("Invalid")) {
+        showErr(unInput, "");
+        showErr(pwInput, "");
+      }
+      errMsg.textContent   = err.message;
+      errBox.style.display = "flex";
+      btn.disabled         = false;
+      btn.textContent      = "Sign In →";
+    }
+  });
+</script>
+</body>
+</html>
